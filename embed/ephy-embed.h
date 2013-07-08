@@ -36,6 +36,12 @@ G_BEGIN_DECLS
 #define EPHY_IS_EMBED_CLASS(k)        (G_TYPE_CHECK_CLASS_TYPE ((k), EPHY_TYPE_EMBED))
 #define EPHY_EMBED_GET_CLASS(o)       (G_TYPE_INSTANCE_GET_CLASS ((o), EPHY_TYPE_EMBED, EphyEmbedClass))
 
+typedef enum {
+  EPHY_EMBED_MODE_WEB_VIEW,
+  EPHY_EMBED_MODE_OVERVIEW,
+  EPHY_EMBED_MODE_DOCUMENT
+} EphyEmbedMode;
+
 typedef struct _EphyEmbedClass EphyEmbedClass;
 typedef struct _EphyEmbed EphyEmbed;
 typedef struct _EphyEmbedPrivate EphyEmbedPrivate;
@@ -69,10 +75,12 @@ void         ephy_embed_set_delayed_load_request (EphyEmbed *embed,
                                                   WebKitNetworkRequest *request);
 #endif
 gboolean     ephy_embed_has_load_pending         (EphyEmbed *embed);
-void         ephy_embed_set_overview_mode        (EphyEmbed *embed,
-                                                  gboolean   overview_mode);
-gboolean     ephy_embed_get_overview_mode        (EphyEmbed *embed);
+void         ephy_embed_set_mode                 (EphyEmbed *embed,
+                                                  EphyEmbedMode mode);
+EphyEmbedMode ephy_embed_get_mode                (EphyEmbed *embed);
 EphyOverview*ephy_embed_get_overview             (EphyEmbed *embed);
+void         ephy_embed_download_started         (EphyEmbed *embed,
+                                                  WebKitDownload *download);
 
 G_END_DECLS
 

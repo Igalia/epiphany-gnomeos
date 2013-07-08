@@ -574,6 +574,7 @@ download_started_cb (WebKitWebContext *web_context,
 {
   GtkWindow *window = NULL;
   WebKitWebView *web_view;
+  EphyEmbed *embed;
   gboolean ephy_download_set;
 
   /* Is download locked down? */
@@ -605,6 +606,9 @@ download_started_cb (WebKitWebContext *web_context,
     window = gtk_application_get_active_window (GTK_APPLICATION (shell));
 
   ephy_download_new_for_download (download, window);
+  embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
+  if (embed)
+    ephy_embed_download_started (embed, download);
 }
 #endif
 
@@ -786,7 +790,7 @@ ephy_shell_new_tab_full (EphyShell *shell,
     embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
     if (embed != NULL) {
       EphyWebView *view = ephy_embed_get_web_view (embed);
-      if ((ephy_web_view_get_is_blank (view) || ephy_embed_get_overview_mode (embed)) &&
+      if ((ephy_web_view_get_is_blank (view) || ephy_embed_get_mode (embed) == EPHY_EMBED_MODE_OVERVIEW) &&
           ephy_web_view_is_loading (view) == FALSE) {
         active_is_blank = TRUE;
       }

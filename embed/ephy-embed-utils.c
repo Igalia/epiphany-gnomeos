@@ -27,6 +27,7 @@
 #include "ephy-about-handler.h"
 #include "ephy-string.h"
 
+#include <evince-document.h>
 #include <string.h>
 #include <glib/gi18n.h>
 #include <libsoup/soup.h>
@@ -186,4 +187,29 @@ ephy_embed_utils_is_no_show_address (const char *address)
       return TRUE;
 
   return FALSE;
+}
+
+gboolean
+ephy_embed_utils_mime_type_is_supported_document (const char *mime_type)
+{
+  GList *doc_types = ev_backends_manager_get_all_types_info ();
+  GList *l;
+  gboolean found = FALSE;
+
+  for (l = doc_types; l && !found; l = l->next) {
+    EvTypeInfo *info = (EvTypeInfo *) l->data;
+    char **mime_types = info->mime_types;
+    guint i;
+
+    for (i = 0; info->mime_types[i]; ++i) {
+      if (g_ascii_strcasecmp (mime_type, info->mime_types[i]) == 0) {
+        found = TRUE;
+        break;
+      }
+    }
+  }
+
+  g_list_free (doc_types);
+
+  return found;
 }

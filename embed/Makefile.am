@@ -13,7 +13,8 @@ NOINST_H_FILES = \
 	ephy-encoding.h			\
 	ephy-encodings.h		\
 	ephy-file-monitor.h		\
-	ephy-request-about.h
+	ephy-request-about.h		\
+	ephy-document-view.h
 
 INST_H_FILES = \
 	ephy-download.h			\
@@ -26,7 +27,6 @@ INST_H_FILES = \
 	ephy-embed-utils.h              \
 	ephy-overview.h			\
 	ephy-web-view.h
-
 
 BUILT_SOURCES = \
 	ephy-embed-type-builtins.c	\
@@ -49,6 +49,7 @@ libephyembed_la_SOURCES = \
 	ephy-request-about.c		\
 	ephy-embed-prefs.c		\
 	ephy-web-view.c			\
+	ephy-document-view.c            \
 	$(INST_H_FILES)			\
 	$(NOINST_H_FILES)
 

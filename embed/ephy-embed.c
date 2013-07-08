@@ -29,15 +29,18 @@
 #ifndef HAVE_WEBKIT2
 #include "ephy-adblock-manager.h"
 #endif
+#include "ephy-document-view.h"
 #include "ephy-debug.h"
 #include "ephy-download.h"
 #include "ephy-embed-prefs.h"
 #include "ephy-embed-shell.h"
+#include "ephy-embed-type-builtins.h"
 #include "ephy-prefs.h"
 #include "ephy-settings.h"
 #include "ephy-web-view.h"
 #include "nautilus-floating-bar.h"
 
+#include <evince-view.h>
 #include <glib/gi18n.h>
 #ifdef HAVE_WEBKIT2
 #include <webkit2/webkit2.h>
@@ -68,6 +71,7 @@ typedef struct {
 struct _EphyEmbedPrivate
 {
   GtkBox *top_widgets_vbox;
+  EphyEmbedMode mode;
 #ifndef HAVE_WEBKIT2
   GtkScrolledWindow *scrolled_window;
   GtkWidget *inspector_window;
@@ -90,7 +94,7 @@ struct _EphyEmbedPrivate
 #endif
 
   GtkWidget *overview;
-  guint overview_mode : 1;
+  GtkWidget *document_view;
   GSList *messages;
   GSList *keys;
 
@@ -115,7 +119,7 @@ struct _EphyEmbedPrivate
 enum
 {
   PROP_0,
-  PROP_OVERVIEW_MODE,
+  PROP_MODE,
 };
 
 G_DEFINE_TYPE (EphyEmbed, ephy_embed, GTK_TYPE_BOX)
@@ -300,20 +304,8 @@ load_changed_cb (WebKitWebView *web_view,
                  WebKitLoadEvent load_event,
                  EphyEmbed *embed)
 {
-  switch (load_event) {
-  case WEBKIT_LOAD_STARTED: {
-    const char *uri;
-
-    uri = webkit_web_view_get_uri (web_view);
-    ephy_embed_set_overview_mode (embed, g_strcmp0 (uri, "ephy-about:overview") == 0);
-    break;
-  }
-  case WEBKIT_LOAD_COMMITTED:
+ if (load_event == WEBKIT_LOAD_COMMITTED)
     ephy_embed_destroy_top_widgets (embed);
-    break;
-  default:
-    break;
-  }
 }
 #else
 static void
@@ -322,13 +314,9 @@ load_status_changed_cb (WebKitWebView *web_view,
                         EphyEmbed *embed)
 {
   WebKitLoadStatus status = webkit_web_view_get_load_status (web_view);
-  const char *address;
 
-  if (status == WEBKIT_LOAD_COMMITTED) {
+  if (status == WEBKIT_LOAD_COMMITTED)
     ephy_embed_destroy_top_widgets (embed);
-    address = ephy_web_view_get_address (EPHY_WEB_VIEW (web_view));
-    ephy_embed_set_overview_mode (embed, strcmp (address, "ephy-about:overview") == 0);
-  }
 }
 #endif
 
@@ -488,8 +476,8 @@ ephy_embed_set_property (GObject *object,
 
   switch (prop_id)
   {
-  case PROP_OVERVIEW_MODE:
-    ephy_embed_set_overview_mode (embed, g_value_get_boolean (value));
+  case PROP_MODE:
+    ephy_embed_set_mode (embed, g_value_get_enum (value));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -507,8 +495,8 @@ ephy_embed_get_property (GObject *object,
 
   switch (prop_id)
   {
-  case PROP_OVERVIEW_MODE:
-    g_value_set_boolean (value, ephy_embed_get_overview_mode (embed));
+  case PROP_MODE:
+    g_value_set_enum (value, ephy_embed_get_mode (embed));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -535,12 +523,13 @@ ephy_embed_class_init (EphyEmbedClass *klass)
  * If %TRUE activates the overview mode in this #EphyEmbed.
  **/
   g_object_class_install_property (object_class,
-                                   PROP_OVERVIEW_MODE,
-                                   g_param_spec_boolean ("overview-mode",
-                                                         "Overview mode",
-                                                         "Whether the embed is showing the overview",
-                                                         FALSE,
-                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+                                   PROP_MODE,
+                                   g_param_spec_enum ("mode",
+                                   "Mode",
+                                   "The embed mode",
+                                   EPHY_TYPE_EMBED_MODE,
+                                   EPHY_EMBED_MODE_WEB_VIEW,
+                                   G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof(EphyEmbedPrivate));
 }
@@ -664,6 +653,31 @@ ephy_embed_auto_download_url (EphyEmbed *embed, const char *url)
   ephy_download_set_action (download, EPHY_DOWNLOAD_ACTION_OPEN);
 }
 
+static void
+document_download_finished_cb (WebKitDownload *download,
+                               EphyEmbed *embed)
+{
+ const char *document_uri = webkit_download_get_destination (download);
+ if (!embed->priv->document_view) {
+    embed->priv->document_view = ephy_document_view_new ();
+    gtk_box_pack_start (GTK_BOX (embed),
+                        embed->priv->document_view,
+                        TRUE, TRUE, 0);
+    gtk_widget_show (embed->priv->document_view);
+  }
+
+  ephy_document_view_load_uri (EPHY_DOCUMENT_VIEW (embed->priv->document_view),
+                               document_uri);
+}
+
+void
+ephy_embed_download_started (EphyEmbed *embed,
+                             WebKitDownload *download)
+{
+    if (embed->priv->mode == EPHY_EMBED_MODE_DOCUMENT)
+      g_signal_connect (download, "finished", G_CALLBACK (document_download_finished_cb), embed);
+}
+
 #ifndef HAVE_WEBKIT2
 static gboolean
 download_requested_cb (WebKitWebView *web_view,
@@ -685,6 +699,8 @@ download_requested_cb (WebKitWebView *web_view,
 
   ed = ephy_download_new_for_download (download, window);
   ephy_download_set_auto_destination (ed);
+
+  ephy_embed_download_started (embed, download);
 
   return TRUE;
 }
@@ -972,10 +988,6 @@ ephy_embed_constructed (GObject *object)
     gtk_widget_set_halign (priv->overview, GTK_ALIGN_FILL);
     gtk_widget_set_valign (priv->overview, GTK_ALIGN_FILL);
     gtk_overlay_add_overlay (GTK_OVERLAY (overlay), priv->overview);
-
-    g_object_bind_property (embed, "overview-mode",
-                            priv->overview, "visible",
-                            G_BINDING_SYNC_CREATE);
   }
 
   /* Floating message popup for fullscreen mode. */
@@ -1028,6 +1040,7 @@ ephy_embed_constructed (GObject *object)
   gtk_widget_show (GTK_WIDGET (priv->top_widgets_vbox));
   gtk_widget_show (GTK_WIDGET (web_view));
   gtk_widget_show_all (paned);
+  gtk_widget_hide (priv->overview);
 
 #ifdef HAVE_WEBKIT2
   g_object_connect (web_view,
@@ -1210,28 +1223,55 @@ ephy_embed_remove_top_widget (EphyEmbed *embed, GtkWidget *widget)
 }
 
 void
-ephy_embed_set_overview_mode (EphyEmbed *embed, gboolean overview_mode)
+ephy_embed_set_mode (EphyEmbed *embed, EphyEmbedMode mode)
 {
   EphyEmbedPrivate *priv;
+  gboolean show_document, show_overview, show_paned;
 
   g_return_if_fail (EPHY_IS_EMBED (embed));
 
   priv = embed->priv;
 
-  if (priv->overview_mode == overview_mode)
+  if (priv->mode == mode)
     return;
 
-  priv->overview_mode = overview_mode;
+  switch (mode) {
+  case EPHY_EMBED_MODE_WEB_VIEW:
+    show_document = FALSE;
+    show_overview = FALSE;
+    show_paned = TRUE;
+    break;
+  case EPHY_EMBED_MODE_OVERVIEW:
+    show_document = FALSE;
+    show_overview = TRUE;
+    show_paned = TRUE;
+    break;
+  case EPHY_EMBED_MODE_DOCUMENT:
+    show_document = TRUE;
+    show_overview = FALSE;
+    show_paned = FALSE;
+    break;
+  default:
+    g_assert_not_reached ();
+  }
 
-  g_object_notify (G_OBJECT (embed), "overview-mode");
+  priv->mode = mode;
+
+  gtk_widget_set_visible (GTK_WIDGET (priv->paned), show_paned);
+  if (priv->overview)
+    gtk_widget_set_visible (priv->overview, show_overview);
+  if (priv->document_view)
+    gtk_widget_set_visible (priv->document_view, show_document);
+
+  g_object_notify (G_OBJECT (embed), "mode");
 }
 
-gboolean
-ephy_embed_get_overview_mode (EphyEmbed *embed)
+EphyEmbedMode
+ephy_embed_get_mode (EphyEmbed *embed)
 {
-  g_return_val_if_fail (EPHY_IS_EMBED (embed), FALSE);
+  g_return_val_if_fail (EPHY_IS_EMBED (embed), EPHY_EMBED_MODE_WEB_VIEW);
 
-  return embed->priv->overview_mode;
+  return embed->priv->mode;
 }
 
 /**

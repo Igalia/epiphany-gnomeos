@@ -131,6 +131,8 @@ PKG_CHECK_MODULES([DEPENDENCIES], [
 		  gcr-3 >= $GCR_REQUIRED
 		  avahi-gobject >= $AVAHI_REQUIRED
 		  avahi-client >= $AVAHI_REQUIRED
+		  evince-view-3.0
+		  evince-document-3.0
 		  ])
 
 PKG_CHECK_MODULES(WEB_EXTENSION, [

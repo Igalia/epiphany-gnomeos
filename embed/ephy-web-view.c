@@ -1776,6 +1776,11 @@ decide_policy_cb (WebKitWebView *web_view,
   if (g_strcmp0 (webkit_web_resource_get_uri (main_resource), request_uri) != 0)
     return FALSE;
 
+  if (ephy_embed_utils_mime_type_is_supported_document(mime_type)) {
+    EphyEmbed *embed = EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view);
+    ephy_embed_set_mode (embed, EPHY_EMBED_MODE_DOCUMENT);
+  }
+
   webkit_policy_decision_download (decision);
 
   return TRUE;
@@ -2113,12 +2118,16 @@ load_changed_cb (WebKitWebView *web_view,
 
   switch (load_event) {
   case WEBKIT_LOAD_STARTED: {
+    EphyEmbed *embed = EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view);
     const char *loading_uri = NULL;
 
     priv->load_failed = FALSE;
 
     loading_uri = webkit_web_view_get_uri (web_view);
     g_signal_emit_by_name (view, "new-document-now", loading_uri);
+
+    ephy_embed_set_mode (embed, g_strcmp0 (loading_uri, "ephy-about:overview") == 0 ?
+                         EPHY_EMBED_MODE_OVERVIEW : EPHY_EMBED_MODE_WEB_VIEW);
 
     if (ephy_embed_utils_is_no_show_address (loading_uri))
       ephy_web_view_freeze_history (view);
@@ -2278,11 +2287,14 @@ load_status_cb (WebKitWebView *web_view,
     WebKitWebFrame *frame;
     WebKitNetworkResponse *response;
     SoupMessage *message;
+    EphyEmbed *embed = EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view);
 
     /* Title and location. */
     uri = webkit_web_view_get_uri (web_view);
-    ephy_web_view_location_changed (view,
-                                    uri);
+    ephy_web_view_location_changed (view, uri);
+
+    ephy_embed_set_mode (embed, strcmp (uri, "ephy-about:overview") == 0 ?
+                         EPHY_EMBED_MODE_OVERVIEW : EPHY_EMBED_MODE_WEB_VIEW);
 
     /* Security status. */
     frame = webkit_web_view_get_main_frame (WEBKIT_WEB_VIEW(view));

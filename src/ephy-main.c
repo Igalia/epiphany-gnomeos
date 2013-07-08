@@ -33,6 +33,7 @@
 #include "ephy-string.h"
 #include "ephy-web-app-utils.h"
 
+#include <evince-document.h>
 #include <errno.h>
 #include <gdk/gdkx.h>
 #include <glib/gi18n.h>
@@ -457,6 +458,7 @@ main (int argc,
     gtk_window_set_default_icon_name ("web-browser");
   }
 
+  ev_init();
   _ephy_shell_create_instance (mode);
 
   startup_flags = get_startup_flags ();
@@ -478,6 +480,7 @@ main (int argc,
     notify_uninit ();
 
   ephy_initial_state_save ();
+  ev_shutdown ();
   ephy_settings_shutdown ();
   ephy_file_helpers_shutdown ();
   xmlCleanupParser ();
