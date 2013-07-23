@@ -657,7 +657,12 @@ static void
 document_download_finished_cb (WebKitDownload *download,
                                EphyEmbed *embed)
 {
+ EphyWebView *view = EPHY_WEB_VIEW (embed->priv->web_view);
+ WebKitURIRequest *request = webkit_download_get_request (download);
+ const char *uri = webkit_uri_request_get_uri (request);
  const char *document_uri = webkit_download_get_destination (download);
+ gchar *basename;
+
  if (!embed->priv->document_view) {
     embed->priv->document_view = ephy_document_view_new ();
     gtk_box_pack_start (GTK_BOX (embed),
@@ -668,6 +673,11 @@ document_download_finished_cb (WebKitDownload *download,
 
   ephy_document_view_load_uri (EPHY_DOCUMENT_VIEW (embed->priv->document_view),
                                document_uri);
+
+  basename = g_path_get_basename (uri);
+  ephy_web_view_set_title (view, basename);
+  g_free (basename);
+  ephy_web_view_set_address (view, uri);
 }
 
 void
