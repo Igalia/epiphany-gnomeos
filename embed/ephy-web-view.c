@@ -2431,6 +2431,35 @@ ephy_web_view_set_placeholder (EphyWebView *view,
   ephy_web_view_set_address (view, uri);
 }
 
+static gboolean
+redirect_on_soup_status_successful (EphyWebView *view)
+{
+  const gchar *url;
+  gint status_code;
+  gboolean result = TRUE;
+  url = ephy_web_view_get_address (view);
+
+  SoupMessage *message;
+  SoupSession *session;
+
+  session = soup_session_new ();
+  message = soup_message_new (SOUP_METHOD_HEAD, url);
+
+  if (message != NULL) {
+    status_code = soup_session_send_message (session, message);
+    if (SOUP_STATUS_IS_SUCCESSFUL (status_code)) {
+      ephy_web_view_load_url (view, url);
+      result = FALSE;
+    }
+  }
+
+  g_object_unref (message);
+  g_object_unref (session);
+
+  return result;
+}
+
+
 /**
  * ephy_web_view_load_error_page:
  * @view: an #EphyWebView
@@ -2576,6 +2605,11 @@ ephy_web_view_load_error_page (EphyWebView *view,
                    custom_class,
                    image_data ? image_data : "",
                    msg_title, msg, button_reload, button_home, button_back);
+
+  if (g_settings_get_int (EPHY_SETTINGS_MAIN, EPHY_PREFS_REDIRECT_ON_ERROR_DELAY) != 0) {
+    g_timeout_add_seconds (g_settings_get_int (EPHY_SETTINGS_MAIN, EPHY_PREFS_REDIRECT_ON_ERROR_DELAY),
+                           (GSourceFunc) redirect_on_soup_status_successful, WEBKIT_WEB_VIEW (view));
+  }
 
   g_free (template);
   g_free (lang);
