@@ -678,6 +678,11 @@ document_download_finished_cb (WebKitDownload *download,
   ephy_web_view_set_title (view, basename);
   g_free (basename);
   ephy_web_view_set_address (view, uri);
+
+  /* history stuff */
+  char *history_uri = g_strdup (uri);
+  ephy_web_view_history_service_visit_url (view, history_uri);
+  g_free (history_uri);
 }
 
 void

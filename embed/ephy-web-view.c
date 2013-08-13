@@ -923,6 +923,16 @@ ephy_web_view_is_history_frozen (EphyWebView *view)
   return view->priv->history_frozen;
 }
 
+void
+ephy_web_view_history_service_visit_url (EphyWebView *view,
+                                         char *history_uri)
+{
+  if (!ephy_web_view_is_history_frozen (view)) {
+    ephy_history_service_visit_url (view->priv->history_service,
+                                    history_uri,
+                                    view->priv->visit_type);
+  }
+}
 
 static void
 ephy_web_view_clear_history (EphyWebView *view)
