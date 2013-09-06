@@ -128,6 +128,7 @@ typedef enum
 #define EPHY_PREFS_CUSTOM_HTTP_ERRORS_MANAGEMENT  "custom-http-errors-management"
 #define EPHY_PREFS_HOMEPAGE_URL                   "homepage-url"
 #define EPHY_PREFS_REDIRECT_ON_ERROR_DELAY        "redirect-on-error-delay"
+#define EPHY_PREFS_LOCAL_HOMEPAGE_URL             "local-homepage-url"
 
 #define EPHY_PREFS_LOCKDOWN_SCHEMA            "org.gnome.Epiphany.lockdown"
 #define EPHY_PREFS_LOCKDOWN_FULLSCREEN        "disable-fullscreen"

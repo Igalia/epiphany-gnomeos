@@ -2434,13 +2434,14 @@ ephy_web_view_set_placeholder (EphyWebView *view,
 static gboolean
 redirect_on_soup_status_successful (EphyWebView *view)
 {
-  const gchar *url;
+  const gchar *url, *local_url;
   gint status_code;
-  gboolean result = TRUE;
-  url = ephy_web_view_get_address (view);
-
   SoupMessage *message;
   SoupSession *session;
+  gboolean result = TRUE;
+
+  url = ephy_web_view_get_address (view);
+  local_url = g_settings_get_string(EPHY_SETTINGS_MAIN, EPHY_PREFS_LOCAL_HOMEPAGE_URL);
 
   session = soup_session_new ();
   message = soup_message_new (SOUP_METHOD_HEAD, url);
@@ -2451,6 +2452,11 @@ redirect_on_soup_status_successful (EphyWebView *view)
       ephy_web_view_load_url (view, url);
       result = FALSE;
     }
+  }
+
+  if (result && g_strcmp0 (local_url, "") && g_strcmp0 (url, local_url)) {
+    ephy_web_view_load_url (view, local_url);
+    result = FALSE;
   }
 
   g_object_unref (message);

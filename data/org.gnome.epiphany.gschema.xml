@@ -79,6 +79,11 @@
 			<summary>Seconds to automatic redirect after error.</summary>
 			<description>Delay in seconds to redirect from error page to requested URL. Set to 0 to disable the redirection.</description>
 		</key>
+		<key type="s" name="local-homepage-url">
+			<default>''</default>
+			<summary>Local home page</summary>
+			<description>Address of the local home page to be redirected from the error view.</description>
+		</key>
 	</schema>
 	<schema path="/org/gnome/epiphany/ui/" id="org.gnome.Epiphany.ui">
 		<key type="b" name="show-toolbars">
