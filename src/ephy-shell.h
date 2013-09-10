@@ -120,6 +120,7 @@ typedef struct {
   
   char *bookmarks_filename;
   char *session_filename;
+  char *geometry;
   char *bookmark_url;
   
   char **arguments;
@@ -176,6 +177,9 @@ GtkWidget       *ephy_shell_get_history_window           (EphyShell *shell);
 GObject         *ephy_shell_get_pdm_dialog               (EphyShell *shell);
 
 GObject         *ephy_shell_get_prefs_dialog             (EphyShell *shell);
+
+void            ephy_shell_set_geometry                  (EphyShell *shell,
+                                                          EphyWindow *window);
 
 guint           ephy_shell_get_n_windows                (EphyShell *shell);
 

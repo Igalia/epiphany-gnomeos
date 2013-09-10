@@ -55,6 +55,7 @@ static gboolean private_instance = FALSE;
 static gboolean incognito_mode = FALSE;
 static gboolean application_mode = FALSE;
 static char *profile_directory = NULL;
+static char *geometry = NULL;
 
 static gboolean
 option_version_cb (const gchar *option_name,
@@ -90,6 +91,8 @@ static const GOptionEntry option_entries[] =
     N_("Start the browser in application mode"), NULL },
   { "profile", 0, 0, G_OPTION_ARG_STRING, &profile_directory,
     N_("Profile directory to use in the private instance"), N_("DIR") },
+  { "geometry", 'g', 0, G_OPTION_ARG_STRING, &geometry,
+    N_("Set the size and position of the window (WIDTHxHEIGHT+X+Y)"), N_("GEOMETRY") },
   { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_FILENAME_ARRAY, &arguments,
     "", N_("URL …")},
   { "version", 0, G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN, 
@@ -515,6 +518,7 @@ main (int argc,
   ctx = ephy_shell_startup_context_new (startup_flags,
                                         bookmarks_file,
                                         session_filename,
+                                        geometry,
                                         bookmark_url,
                                         arguments,
                                         user_time);

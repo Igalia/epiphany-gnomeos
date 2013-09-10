@@ -2804,6 +2804,9 @@ ephy_window_connect_active_embed (EphyWindow *window)
 				 G_CALLBACK (create_web_view_cb),
 				 window, 0);
 #endif
+
+	ephy_shell_set_geometry (EPHY_SHELL (ephy_embed_shell_get_default ()), window);
+
 #ifdef HAVE_WEBKIT2
 	g_signal_connect_object (web_view, "decide-policy",
 				 G_CALLBACK (decide_policy_cb),

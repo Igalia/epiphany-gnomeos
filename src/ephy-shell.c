@@ -95,6 +95,7 @@ EphyShellStartupContext *
 ephy_shell_startup_context_new (EphyStartupFlags startup_flags,
                                 char *bookmarks_filename,
                                 char *session_filename,
+                                char *geometry,
                                 char *bookmark_url,
                                 char **arguments,
                                 guint32 user_time)
@@ -105,6 +106,7 @@ ephy_shell_startup_context_new (EphyStartupFlags startup_flags,
 
   ctx->bookmarks_filename = g_strdup (bookmarks_filename);
   ctx->session_filename = g_strdup (session_filename);
+  ctx->geometry = g_strdup (geometry);
   ctx->bookmark_url = g_strdup (bookmark_url);
 
   ctx->arguments = g_strdupv (arguments);
@@ -365,6 +367,7 @@ typedef enum {
   CTX_BOOKMARKS_FILENAME,
   CTX_SESSION_FILENAME,
   CTX_BOOKMARK_URL,
+  CTX_GEOMETRY,
   CTX_ARGUMENTS,
   CTX_USER_TIME
 } CtxEnum;
@@ -412,6 +415,11 @@ ephy_shell_add_platform_data (GApplication *application,
                              CTX_BOOKMARK_URL,
                              g_variant_new_string (ctx->bookmark_url));
 
+    if (ctx->geometry)
+      g_variant_builder_add (ctx_builder, "{iv}",
+                             CTX_GEOMETRY,
+                             g_variant_new_string (ctx->geometry));
+
     /*
      * If there are no URIs specified, pass an empty string, so that
      * the primary instance opens a new window.
@@ -437,6 +445,13 @@ ephy_shell_add_platform_data (GApplication *application,
   }
 }
 
+void
+ephy_shell_set_geometry (EphyShell *shell, EphyWindow *window)
+{
+  EphyShellStartupContext *ctx = shell->priv->startup_context;
+  gtk_window_parse_geometry (GTK_WINDOW (window), ctx->geometry);
+}
+
 static void
 ephy_shell_free_startup_context (EphyShell *shell)
 {
@@ -447,6 +462,7 @@ ephy_shell_free_startup_context (EphyShell *shell)
   g_free (ctx->bookmarks_filename);
   g_free (ctx->session_filename);
   g_free (ctx->bookmark_url);
+  g_free (ctx->geometry);
 
   g_strfreev (ctx->arguments);
 
@@ -490,6 +506,9 @@ ephy_shell_before_emit (GApplication *application,
           break;
         case CTX_BOOKMARK_URL:
           ctx->bookmark_url = g_variant_dup_string (ctx_value, NULL);
+          break;
+        case CTX_GEOMETRY:
+          ctx->geometry = g_variant_dup_string (ctx_value, NULL);
           break;
         case CTX_ARGUMENTS:
           ctx->arguments = g_variant_dup_strv (ctx_value, NULL);
