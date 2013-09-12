@@ -99,20 +99,6 @@ action_activate (GtkAction *action)
 
   web_view = EPHY_GET_WEBKIT_WEB_VIEW_FROM_EMBED (embed);
 
-  if (ephy_embed_get_mode (embed) == EPHY_EMBED_MODE_DOCUMENT) {
-    const char *current_uri;
-    WebKitBackForwardList *history;
-    WebKitBackForwardListItem *current_item;
-
-    history = webkit_web_view_get_back_forward_list (web_view);
-    current_item = webkit_back_forward_list_get_current_item (history);
-    current_uri = webkit_back_forward_list_item_get_original_uri (current_item);
-    webkit_web_view_load_uri (web_view, current_uri);
-    ephy_embed_set_mode (embed, EPHY_EMBED_MODE_WEB_VIEW);
-    gtk_widget_grab_focus (GTK_WIDGET (embed));
-    return;
-  }
-
   /* We use ephy_link_action_get_button on top of
    * ephy_gui_is_middle_click because of the hacks we have to do to
    * fake middle clicks on tool buttons. Read the documentation of
