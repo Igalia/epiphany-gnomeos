@@ -221,7 +221,6 @@ main (int argc,
   GOptionGroup *option_group;
   GError *error = NULL;
   guint32 user_time;
-  gboolean arbitrary_url;
   EphyShellStartupContext *ctx;
   EphyStartupFlags startup_flags;
   EphyEmbedShellMode mode;
@@ -378,14 +377,6 @@ main (int argc,
   if (!ephy_file_helpers_init (profile_directory, flags,
                                &error)) {
     show_error_message (&error);
-    exit (1);
-  }
-
-  arbitrary_url = g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN,
-                                          EPHY_PREFS_LOCKDOWN_ARBITRARY_URL);
-
-  if (arguments != NULL && arbitrary_url) {
-    g_print ("URL loading is locked down.\n");
     exit (1);
   }
 
