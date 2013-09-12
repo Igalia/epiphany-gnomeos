@@ -2795,6 +2795,11 @@ ephy_window_connect_active_embed (EphyWindow *window)
 				 G_CALLBACK (sync_tab_zoom),
 				 window, 0);
 
+	if (g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN, EPHY_PREFS_LOCKDOWN_MENUS)) {
+		gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
+		gtk_window_set_has_resize_grip (GTK_WINDOW (window), FALSE);
+	}
+
 #ifdef HAVE_WEBKIT2
 	g_signal_connect_object (web_view, "create",
 				 G_CALLBACK (create_web_view_cb),

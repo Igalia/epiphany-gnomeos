@@ -141,6 +141,7 @@ typedef enum
 #define EPHY_PREFS_LOCKDOWN_QUIT              "disable-quit"
 #define EPHY_PREFS_LOCKDOWN_JAVASCRIPT_CHROME "disable-javascript-chrome"
 #define EPHY_PREFS_LOCKDOWN_MULTIPLE_TABS     "disable-multiple-tabs"
+#define EPHY_PREFS_LOCKDOWN_MENUS             "disable-menus"
 
 G_END_DECLS
 
