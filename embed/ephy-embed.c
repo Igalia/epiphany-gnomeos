@@ -62,6 +62,8 @@ static void     ephy_embed_restored_window_cb  (EphyEmbedShell *shell,
 
 #define EPHY_EMBED_STATUSBAR_TAB_MESSAGE_CONTEXT_DESCRIPTION "tab_message"
 
+#define EPHY_SHOW_PROGRESS_BAR 0
+
 typedef struct {
   gchar *text;
   guint context_id;
@@ -83,7 +85,9 @@ struct _EphyEmbedPrivate
   WebKitWebView *web_view;
   GSList *destroy_on_transition_list;
   GtkWidget *floating_bar;
+#if EPHY_SHOW_PROGRESS_BAR
   GtkWidget *progress;
+#endif
   GtkWidget *fullscreen_message_label;
   char *fullscreen_string;
 
@@ -856,7 +860,9 @@ clear_progress_cb (EphyEmbed *embed)
   GtkWidget *widget;
   GdkCursor *cursor;
 
+#if EPHY_SHOW_PROGRESS_BAR
   gtk_widget_hide (embed->priv->progress);
+#endif
   embed->priv->clear_progress_source_id = 0;
 
   widget = GTK_WIDGET (embed->priv->web_view);
@@ -901,7 +907,9 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
     GtkWidget *widget;
     GdkCursor *cursor;
 
+#if EPHY_SHOW_PROGRESS_BAR
     gtk_widget_show (priv->progress);
+#endif
 
     widget = GTK_WIDGET (embed->priv->web_view);
     cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
@@ -909,8 +917,10 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
     gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
   }
 
+#if EPHY_SHOW_PROGRESS_BAR
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress),
                                  (loading || progress == 1.0) ? progress : 0.0);
+#endif
 }
 
 #ifndef HAVE_WEBKIT2
@@ -1039,12 +1049,14 @@ ephy_embed_constructed (GObject *object)
 
   gtk_overlay_add_overlay (GTK_OVERLAY (overlay), priv->floating_bar);
 
+#if EPHY_SHOW_PROGRESS_BAR
   priv->progress = gtk_progress_bar_new ();
   gtk_style_context_add_class (gtk_widget_get_style_context (priv->progress),
                                GTK_STYLE_CLASS_OSD);
   gtk_widget_set_halign (priv->progress, GTK_ALIGN_FILL);
   gtk_widget_set_valign (priv->progress, GTK_ALIGN_START);
   gtk_overlay_add_overlay (GTK_OVERLAY (overlay), priv->progress);
+#endif
 
   paned = GTK_WIDGET (priv->paned);
 
