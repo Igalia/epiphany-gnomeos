@@ -40,6 +40,7 @@
 #include <libnotify/notify.h>
 #include <libxml/xmlversion.h>
 #include <string.h>
+#include <syslog.h>
 
 static gboolean open_in_new_tab = FALSE;
 static gboolean open_in_new_window = FALSE;
@@ -213,6 +214,81 @@ get_startup_flags (void)
   return flags;
 }
 
+static void
+syslog_handler (const gchar *log_domain,
+                GLogLevelFlags log_level,
+                const gchar *message,
+                gpointer user_data)
+{
+  gchar *full_message = NULL;
+
+  const gchar *tgt_debug = g_getenv ("TGT_DEBUG");
+
+  switch (log_level) {
+    case G_LOG_LEVEL_ERROR:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
+          g_strcmp0 (tgt_debug, "INFO") == 0 ||
+          g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
+          g_strcmp0 (tgt_debug, "WARNING") == 0 ||
+          g_strcmp0 (tgt_debug, "CRITICAL") == 0 ||
+          g_strcmp0 (tgt_debug, "ERROR") == 0) {
+        full_message = g_strdup_printf ("%s - Error: %s", log_domain, message);
+        syslog (LOG_ERR, full_message);
+      }
+      break;
+    case G_LOG_LEVEL_CRITICAL:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
+          g_strcmp0 (tgt_debug, "INFO") == 0 ||
+          g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
+          g_strcmp0 (tgt_debug, "WARNING") == 0 ||
+          g_strcmp0 (tgt_debug, "CRITICAL") == 0) {
+        full_message = g_strdup_printf ("%s - Critical: %s", log_domain, message);
+        syslog (LOG_CRIT, full_message);
+      }
+      break;
+    case G_LOG_LEVEL_WARNING:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
+          g_strcmp0 (tgt_debug, "INFO") == 0 ||
+          g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
+          g_strcmp0 (tgt_debug, "WARNING") == 0) {
+        full_message = g_strdup_printf ("%s - Warning: %s", log_domain, message);
+        syslog (LOG_WARNING, full_message);
+      }
+      break;
+    case G_LOG_LEVEL_MESSAGE:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
+          g_strcmp0 (tgt_debug, "INFO") == 0 ||
+          g_strcmp0 (tgt_debug, "MESSAGE") == 0) {
+        full_message = g_strdup_printf ("%s - Message: %s", log_domain, message);
+        syslog (LOG_NOTICE, full_message);
+      }
+      break;
+    case G_LOG_LEVEL_INFO:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
+          g_strcmp0 (tgt_debug, "INFO") == 0) {
+        full_message = g_strdup_printf ("%s - Info: %s", log_domain, message);
+        syslog (LOG_INFO, full_message);
+      }
+      break;
+    case G_LOG_LEVEL_DEBUG:
+      if (!tgt_debug ||
+          g_strcmp0 (tgt_debug, "DEBUG") == 0) {
+        full_message = g_strdup_printf ("%s - Debug: %s", log_domain, message);
+        syslog (LOG_DEBUG, full_message);
+      }
+      break;
+    default:
+      break;
+  }
+
+  g_free (full_message);
+}
+
 int
 main (int argc,
       char *argv[])
@@ -294,7 +370,7 @@ main (int argc,
   }
   
   /* Initialise our debug helpers */
-  ephy_debug_init ();
+  g_log_set_default_handler (syslog_handler, NULL);
   
   /* get this early, since gdk will unset the env var */
   user_time = get_startup_id ();
@@ -460,6 +536,7 @@ main (int argc,
   g_strfreev (arguments);
   ephy_shell = ephy_shell_get_default ();
   ephy_shell_set_startup_context (ephy_shell, ctx);
+
   status = g_application_run (G_APPLICATION (ephy_shell), argc, argv);
 
   /* Shutdown */
