@@ -832,12 +832,14 @@ clear_progress_cb (EphyEmbed *embed)
 #if EPHY_SHOW_PROGRESS_BAR
   gtk_widget_hide (embed->priv->progress);
 #endif
-  embed->priv->clear_progress_source_id = 0;
 
   widget = GTK_WIDGET (embed->priv->web_view);
-  cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
-                                       GDK_LAST_CURSOR);
-  gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
+  cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
+                                     "left_ptr");
+  if (cursor)
+    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
+
+  embed->priv->clear_progress_source_id = 0;
 
   return FALSE;
 }
@@ -881,9 +883,10 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
 #endif
 
     widget = GTK_WIDGET (embed->priv->web_view);
-    cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
-                                         GDK_WATCH);
-    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
+    cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
+                                       "left_ptr_watch");
+    if (cursor)
+      gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
   }
 
 #if EPHY_SHOW_PROGRESS_BAR
