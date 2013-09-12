@@ -853,8 +853,16 @@ window_resize_requested (WebKitWebWindowFeatures *features, GParamSpec *pspec, E
 static gboolean
 clear_progress_cb (EphyEmbed *embed)
 {
+  GtkWidget *widget;
+  GdkCursor *cursor;
+
   gtk_widget_hide (embed->priv->progress);
   embed->priv->clear_progress_source_id = 0;
+
+  widget = GTK_WIDGET (embed->priv->web_view);
+  cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
+                                       GDK_LAST_CURSOR);
+  gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
 
   return FALSE;
 }
@@ -889,8 +897,17 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
     priv->clear_progress_source_id = g_timeout_add (500,
                                                     (GSourceFunc)clear_progress_cb,
                                                     embed);
-  else
+  else {
+    GtkWidget *widget;
+    GdkCursor *cursor;
+
     gtk_widget_show (priv->progress);
+
+    widget = GTK_WIDGET (embed->priv->web_view);
+    cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
+                                         GDK_WATCH);
+    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
+  }
 
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->progress),
                                  (loading || progress == 1.0) ? progress : 0.0);
