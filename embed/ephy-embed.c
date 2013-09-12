@@ -60,6 +60,7 @@ static void     ephy_embed_restored_window_cb  (EphyEmbedShell *shell,
 #define EPHY_EMBED_STATUSBAR_TAB_MESSAGE_CONTEXT_DESCRIPTION "tab_message"
 
 #define EPHY_SHOW_PROGRESS_BAR 0
+#define EPHY_SHOW_STATUS_BAR 0
 
 typedef struct {
   gchar *text;
@@ -80,7 +81,9 @@ struct _EphyEmbedPrivate
   GtkPaned *paned;
   WebKitWebView *web_view;
   GSList *destroy_on_transition_list;
+#if EPHY_SHOW_STATUS_BAR
   GtkWidget *floating_bar;
+#endif
 #if EPHY_SHOW_PROGRESS_BAR
   GtkWidget *progress;
 #endif
@@ -183,6 +186,7 @@ ephy_embed_set_statusbar_label (EphyEmbed *embed, const char *label)
 {
   EphyEmbedPrivate *priv = embed->priv;
 
+#if EPHY_SHOW_STATUS_BAR
   nautilus_floating_bar_set_label (NAUTILUS_FLOATING_BAR (priv->floating_bar), label);
 
   if (label == NULL || label[0] == '\0') {
@@ -190,6 +194,7 @@ ephy_embed_set_statusbar_label (EphyEmbed *embed, const char *label)
     gtk_widget_set_halign (priv->floating_bar, GTK_ALIGN_START);
   } else
     gtk_widget_show (priv->floating_bar);
+#endif
 }
 
 static void
@@ -826,19 +831,9 @@ window_resize_requested (WebKitWebWindowFeatures *features, GParamSpec *pspec, E
 static gboolean
 clear_progress_cb (EphyEmbed *embed)
 {
-  GtkWidget *widget;
-  GdkCursor *cursor;
-
 #if EPHY_SHOW_PROGRESS_BAR
   gtk_widget_hide (embed->priv->progress);
 #endif
-
-  widget = GTK_WIDGET (embed->priv->web_view);
-  cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
-                                     "left_ptr");
-  if (cursor)
-    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
-
   embed->priv->clear_progress_source_id = 0;
 
   return FALSE;
@@ -875,18 +870,9 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
                                                     (GSourceFunc)clear_progress_cb,
                                                     embed);
   else {
-    GtkWidget *widget;
-    GdkCursor *cursor;
-
 #if EPHY_SHOW_PROGRESS_BAR
     gtk_widget_show (priv->progress);
 #endif
-
-    widget = GTK_WIDGET (embed->priv->web_view);
-    cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
-                                       "left_ptr_watch");
-    if (cursor)
-      gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
   }
 
 #if EPHY_SHOW_PROGRESS_BAR
@@ -1018,12 +1004,14 @@ ephy_embed_constructed (GObject *object)
   ephy_embed_set_fullscreen_message (embed, FALSE);
 
   /* statusbar is hidden by default */
+#if EPHY_SHOW_STATUS_BAR
   priv->floating_bar = nautilus_floating_bar_new (NULL, FALSE);
   gtk_widget_set_halign (priv->floating_bar, GTK_ALIGN_START);
   gtk_widget_set_valign (priv->floating_bar, GTK_ALIGN_END);
   gtk_widget_set_no_show_all (priv->floating_bar, TRUE);
 
   gtk_overlay_add_overlay (GTK_OVERLAY (overlay), priv->floating_bar);
+#endif
 
 #if EPHY_SHOW_PROGRESS_BAR
   priv->progress = gtk_progress_bar_new ();
