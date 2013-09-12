@@ -48,7 +48,6 @@ gboolean ephy_embed_utils_address_is_existing_absolute_filename (const char *add
 char*    ephy_embed_utils_normalize_address                     (const char *address);
 gboolean ephy_embed_utils_url_is_empty                          (const char *location);
 gboolean ephy_embed_utils_is_no_show_address                    (const char *address);
-gboolean ephy_embed_utils_mime_type_is_supported_document       (const char *mime_type);
 
 G_END_DECLS
 

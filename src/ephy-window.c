@@ -2258,14 +2258,13 @@ ephy_window_mouse_target_changed_cb (WebKitWebView *web_view,
 #endif
 
 static void
-sync_embed_mode (EphyEmbed *embed, GParamSpec *pspec, EphyWindow *window)
+sync_embed_is_overview (EphyEmbed *embed, GParamSpec *pspec, EphyWindow *window)
 {
 	if (window->priv->closing) return;
 
-	/* For now we can consider documents as about:blank */
 	_ephy_window_set_default_actions_sensitive (window,
 						    SENS_FLAG_IS_BLANK,
-						    ephy_embed_get_mode (embed) != EPHY_EMBED_MODE_WEB_VIEW);
+						    ephy_embed_get_overview_mode (embed));;
 }
 
 static void
@@ -2788,7 +2787,7 @@ ephy_window_connect_active_embed (EphyWindow *window)
 	sync_tab_icon		(view, NULL, window);
 	sync_tab_popup_windows	(view, NULL, window);
 	sync_tab_popups_allowed	(view, NULL, window);
-	sync_embed_mode         (embed, NULL, window);
+	sync_embed_is_overview  (embed, NULL, window);
 
 	sync_tab_zoom		(web_view, NULL, window);
 
@@ -2874,8 +2873,8 @@ ephy_window_connect_active_embed (EphyWindow *window)
 				 G_CALLBACK (ephy_window_dom_mouse_click_cb),
 				 window, G_CONNECT_AFTER);
 #endif
-	g_signal_connect_object (embed, "notify::mode",
-				 G_CALLBACK (sync_embed_mode),
+	g_signal_connect_object (embed, "notify::overview-mode",
+				 G_CALLBACK (sync_embed_is_overview),
 				 window, 0);
 
 	shell_mode = ephy_embed_shell_get_mode (EPHY_EMBED_SHELL (ephy_embed_shell_get_default ()));
@@ -2970,7 +2969,7 @@ ephy_window_disconnect_active_embed (EphyWindow *window)
 					      window);
 
 	g_signal_handlers_disconnect_by_func (embed,
-					      G_CALLBACK (sync_embed_mode),
+					      G_CALLBACK (sync_embed_is_overview),
 					      window);
 
 	shell_mode = ephy_embed_shell_get_mode (EPHY_EMBED_SHELL (ephy_embed_shell_get_default ()));
