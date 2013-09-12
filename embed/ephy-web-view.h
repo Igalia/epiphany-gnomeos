@@ -138,8 +138,6 @@ void                       ephy_web_view_load_url                 (EphyWebView  
                                                                    const char                *url);
 void                       ephy_web_view_copy_back_history        (EphyWebView               *source,
                                                                    EphyWebView               *dest);
-void                       ephy_web_view_history_service_visit_url (EphyWebView              *view,
-                                                                    char                     *history_uri);
 gboolean                   ephy_web_view_is_loading               (EphyWebView               *view);
 gboolean                   ephy_web_view_load_failed              (EphyWebView               *view);
 const char *               ephy_web_view_get_loading_title        (EphyWebView               *view);
