@@ -220,8 +220,6 @@ syslog_handler (const gchar *log_domain,
                 const gchar *message,
                 gpointer user_data)
 {
-  gchar *full_message = NULL;
-
   const gchar *tgt_debug = g_getenv ("TGT_DEBUG");
 
   switch (log_level) {
@@ -232,10 +230,8 @@ syslog_handler (const gchar *log_domain,
           g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
           g_strcmp0 (tgt_debug, "WARNING") == 0 ||
           g_strcmp0 (tgt_debug, "CRITICAL") == 0 ||
-          g_strcmp0 (tgt_debug, "ERROR") == 0) {
-        full_message = g_strdup_printf ("%s - Error: %s", log_domain, message);
-        syslog (LOG_ERR, full_message);
-      }
+          g_strcmp0 (tgt_debug, "ERROR") == 0)
+        syslog (LOG_ERR, "%s - Error: %s", log_domain, message);
       break;
     case G_LOG_LEVEL_CRITICAL:
       if (!tgt_debug ||
@@ -243,50 +239,39 @@ syslog_handler (const gchar *log_domain,
           g_strcmp0 (tgt_debug, "INFO") == 0 ||
           g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
           g_strcmp0 (tgt_debug, "WARNING") == 0 ||
-          g_strcmp0 (tgt_debug, "CRITICAL") == 0) {
-        full_message = g_strdup_printf ("%s - Critical: %s", log_domain, message);
-        syslog (LOG_CRIT, full_message);
-      }
+          g_strcmp0 (tgt_debug, "CRITICAL") == 0)
+        syslog (LOG_CRIT, "%s - Critical: %s", log_domain, message);
       break;
     case G_LOG_LEVEL_WARNING:
       if (!tgt_debug ||
           g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
           g_strcmp0 (tgt_debug, "INFO") == 0 ||
           g_strcmp0 (tgt_debug, "MESSAGE") == 0 ||
-          g_strcmp0 (tgt_debug, "WARNING") == 0) {
-        full_message = g_strdup_printf ("%s - Warning: %s", log_domain, message);
-        syslog (LOG_WARNING, full_message);
-      }
+          g_strcmp0 (tgt_debug, "WARNING") == 0)
+        syslog (LOG_WARNING, "%s - Warning: %s", log_domain, message);
       break;
     case G_LOG_LEVEL_MESSAGE:
       if (!tgt_debug ||
           g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
           g_strcmp0 (tgt_debug, "INFO") == 0 ||
-          g_strcmp0 (tgt_debug, "MESSAGE") == 0) {
-        full_message = g_strdup_printf ("%s - Message: %s", log_domain, message);
-        syslog (LOG_NOTICE, full_message);
-      }
+          g_strcmp0 (tgt_debug, "MESSAGE") == 0)
+        syslog (LOG_NOTICE, "%s - Message: %s", log_domain, message);
       break;
     case G_LOG_LEVEL_INFO:
       if (!tgt_debug ||
           g_strcmp0 (tgt_debug, "DEBUG") == 0 ||
-          g_strcmp0 (tgt_debug, "INFO") == 0) {
-        full_message = g_strdup_printf ("%s - Info: %s", log_domain, message);
-        syslog (LOG_INFO, full_message);
-      }
+          g_strcmp0 (tgt_debug, "INFO") == 0)
+        syslog (LOG_INFO, "%s - Info: %s", log_domain, message);
       break;
     case G_LOG_LEVEL_DEBUG:
       if (!tgt_debug ||
-          g_strcmp0 (tgt_debug, "DEBUG") == 0) {
-        full_message = g_strdup_printf ("%s - Debug: %s", log_domain, message);
-        syslog (LOG_DEBUG, full_message);
-      }
+          g_strcmp0 (tgt_debug, "DEBUG") == 0)
+        syslog (LOG_DEBUG, "%s - Debug: %s", log_domain, message);
       break;
     default:
       break;
   }
 
-  g_free (full_message);
 }
 
 int
