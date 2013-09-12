@@ -1776,8 +1776,7 @@ decide_policy_cb (WebKitWebView *web_view,
   if (g_strcmp0 (webkit_web_resource_get_uri (main_resource), request_uri) != 0)
     return FALSE;
 
-  if (ephy_embed_utils_mime_type_is_supported_document(mime_type) &&
-      g_settings_get_boolean (EPHY_SETTINGS_MAIN, EPHY_PREFS_EMBED_DOCUMENT)) {
+  if (ephy_embed_utils_mime_type_is_supported_document(mime_type)) {
     EphyEmbed *embed = EPHY_GET_EMBED_FROM_EPHY_WEB_VIEW (web_view);
     ephy_embed_set_mode (embed, EPHY_EMBED_MODE_DOCUMENT);
   }
