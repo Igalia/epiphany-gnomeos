@@ -698,7 +698,8 @@ get_chromes_visibility (EphyWindow *window,
 	EphyWindowPrivate *priv = window->priv;
 	EphyWebViewChrome flags = priv->chrome;
 
-	if (ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) == EPHY_EMBED_SHELL_MODE_APPLICATION)
+	if (ephy_embed_shell_get_mode (ephy_embed_shell_get_default ()) == EPHY_EMBED_SHELL_MODE_APPLICATION ||
+		g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN, EPHY_PREFS_LOCKDOWN_MENUS))
 	{
 		*show_toolbar = FALSE;
 		*show_tabsbar = FALSE;
