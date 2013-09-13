@@ -60,6 +60,7 @@ static void     ephy_embed_restored_window_cb  (EphyEmbedShell *shell,
 #define EPHY_EMBED_STATUSBAR_TAB_MESSAGE_CONTEXT_DESCRIPTION "tab_message"
 
 #define EPHY_SHOW_PROGRESS_BAR 0
+#define EPHY_SHOW_STATUS_BAR 0
 
 typedef struct {
   gchar *text;
@@ -80,7 +81,9 @@ struct _EphyEmbedPrivate
   GtkPaned *paned;
   WebKitWebView *web_view;
   GSList *destroy_on_transition_list;
+#if EPHY_SHOW_STATUS_BAR
   GtkWidget *floating_bar;
+#endif
 #if EPHY_SHOW_PROGRESS_BAR
   GtkWidget *progress;
 #endif
@@ -183,6 +186,7 @@ ephy_embed_set_statusbar_label (EphyEmbed *embed, const char *label)
 {
   EphyEmbedPrivate *priv = embed->priv;
 
+#if EPHY_SHOW_STATUS_BAR
   nautilus_floating_bar_set_label (NAUTILUS_FLOATING_BAR (priv->floating_bar), label);
 
   if (label == NULL || label[0] == '\0') {
@@ -190,6 +194,7 @@ ephy_embed_set_statusbar_label (EphyEmbed *embed, const char *label)
     gtk_widget_set_halign (priv->floating_bar, GTK_ALIGN_START);
   } else
     gtk_widget_show (priv->floating_bar);
+#endif
 }
 
 static void
@@ -1018,12 +1023,14 @@ ephy_embed_constructed (GObject *object)
   ephy_embed_set_fullscreen_message (embed, FALSE);
 
   /* statusbar is hidden by default */
+#if EPHY_SHOW_STATUS_BAR
   priv->floating_bar = nautilus_floating_bar_new (NULL, FALSE);
   gtk_widget_set_halign (priv->floating_bar, GTK_ALIGN_START);
   gtk_widget_set_valign (priv->floating_bar, GTK_ALIGN_END);
   gtk_widget_set_no_show_all (priv->floating_bar, TRUE);
 
   gtk_overlay_add_overlay (GTK_OVERLAY (overlay), priv->floating_bar);
+#endif
 
 #if EPHY_SHOW_PROGRESS_BAR
   priv->progress = gtk_progress_bar_new ();
