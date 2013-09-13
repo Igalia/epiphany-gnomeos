@@ -2099,26 +2099,6 @@ web_view_check_snapshot (WebKitWebView *web_view)
   return FALSE;
 }
 
-static void
-set_loading_cursor (EphyWebView *view)
-{
-  GtkWidget *widget = GTK_WIDGET (view);
-  GdkCursor *cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
-                                                "left_ptr_watch");
-  if (cursor)
-    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
-}
-
-static void
-come_back_to_regular_cursor (EphyWebView *view)
-{
-  GtkWidget *widget = GTK_WIDGET (view);
-  GdkCursor *cursor = gdk_cursor_new_for_display (gtk_widget_get_display (widget),
-                                                  GDK_LAST_CURSOR);
-  if (cursor)
-    gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
-}
-
 #ifdef HAVE_WEBKIT2
 static void
 load_changed_cb (WebKitWebView *web_view,
@@ -2154,8 +2134,6 @@ load_changed_cb (WebKitWebView *web_view,
 
     /* Zoom level. */
     restore_zoom_level (view, loading_uri);
-
-    set_loading_cursor (view);
 
     break;
   }
@@ -2243,8 +2221,6 @@ load_changed_cb (WebKitWebView *web_view,
     }
 
     ephy_web_view_thaw_history (view);
-
-    come_back_to_regular_cursor (view);
 
     break;
   }
@@ -2669,8 +2645,6 @@ load_error_cb (WebKitWebView *web_view,
   if (webkit_web_view_get_main_frame (web_view) != frame)
     return FALSE;
 #endif
-
-  come_back_to_regular_cursor (view);
 
   if (error->domain == SOUP_HTTP_ERROR) {
     ephy_web_view_load_error_page (view, uri, EPHY_WEB_VIEW_ERROR_PAGE_NETWORK_ERROR, error);
