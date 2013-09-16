@@ -452,7 +452,8 @@ void
 ephy_shell_set_geometry (EphyShell *shell, EphyWindow *window)
 {
   EphyShellStartupContext *ctx = shell->priv->startup_context;
-  gtk_window_parse_geometry (GTK_WINDOW (window), ctx->geometry);
+  if (ctx->geometry != NULL)
+    gtk_window_parse_geometry (GTK_WINDOW (window), ctx->geometry);
 }
 
 static void
