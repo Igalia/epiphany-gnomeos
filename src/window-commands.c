@@ -1390,6 +1390,14 @@ window_cmd_view_fullscreen (GtkAction *action,
 }
 
 void
+window_cmd_view_shortcuts (GtkAction *action,
+			    EphyWindow *window) {
+	EphyEmbed *embed;
+	embed = ephy_embed_container_get_active_child (EPHY_EMBED_CONTAINER (window));
+	ephy_show_shortcuts_info(embed);
+}
+
+void
 window_cmd_view_zoom_in	(GtkAction *action,
 			 EphyWindow *window)
 {

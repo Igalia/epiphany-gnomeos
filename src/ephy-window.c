@@ -82,6 +82,8 @@
 #include <X11/XF86keysym.h>
 #endif
 
+#define EPHY_DEFAULT_SHORTCUTS 0
+
 /**
  * SECTION:ephy-window
  * @short_description: Epiphany's main #GtkWindow widget
@@ -109,8 +111,10 @@ static const GtkActionEntry ephy_menu_entries [] = {
 	  G_CALLBACK (window_cmd_file_new_incognito_window) },
 	{ "FileOpen", NULL, N_("_Open…"), "<control>O", NULL,
 	  G_CALLBACK (window_cmd_file_open) },
+#if EPHY_DEFAULT_SHORTCUTS
 	{ "FileSaveAs", NULL, N_("Save _As…"), "<shift><control>S", NULL,
 	  G_CALLBACK (window_cmd_file_save_as) },
+#endif
 	{ "FileSaveAsApplication", NULL, N_("Save As _Web Application…"), "<shift><control>A", NULL,
 	  G_CALLBACK (window_cmd_file_save_as_application) },
 	{ "FilePrint", NULL, N_("_Print…"), "<control>P", NULL,
@@ -148,9 +152,9 @@ static const GtkActionEntry ephy_menu_entries [] = {
 	  G_CALLBACK (window_cmd_edit_bookmarks) },
 	{ "EditHistory", NULL, N_("_History"), "<control>H", NULL,
 	  G_CALLBACK (window_cmd_edit_history) },
-	{ "EditPreferences", NULL, N_("Preferences"), "<control>e", NULL,
+	{ "EditPreferences", NULL, N_("Preferences"), NULL, NULL,
 	  G_CALLBACK (window_cmd_edit_preferences) },
-	{ "EditPersonalData", NULL, N_("Personal Data"), "<control>m", NULL,
+	{ "EditPersonalData", NULL, N_("Personal Data"), NULL, NULL,
 	  G_CALLBACK (window_cmd_edit_personal_data) },
 
 	/* View actions. */
@@ -178,9 +182,10 @@ static const GtkActionEntry ephy_menu_entries [] = {
 
 	/* Go actions. */
 
+#if EHPY_DEFAULT_SHORTCUTS
 	{ "GoLocation", NULL, N_("_Location…"), "<control>L", NULL,
 	  G_CALLBACK (window_cmd_go_location) },
-
+#endif
 	/* Tabs actions. */
 
 	{ "TabsPrevious", NULL, N_("_Previous Tab"), "<control>Page_Up", NULL,
@@ -202,8 +207,11 @@ static const GtkActionEntry ephy_menu_entries [] = {
 
 static const GtkToggleActionEntry ephy_menu_toggle_entries [] =
 {
-	/* File actions. */
 
+#if EPHY_DEFAULT_SHORTCUTS
+	/* File actions. */
+	{ "ViewShortcutsHelp", NULL, N_("_Shortcuts help"), "F1", NULL,
+		  G_CALLBACK (window_cmd_view_fullscreen), FALSE },
 	{ "FileWorkOffline", NULL, N_("_Work Offline"), NULL, NULL,
 	  G_CALLBACK (window_cmd_file_work_offline), FALSE },
 
@@ -218,6 +226,12 @@ static const GtkToggleActionEntry ephy_menu_toggle_entries [] =
 	  G_CALLBACK (ephy_window_view_popup_windows_cb), FALSE },
 	{ "BrowseWithCaret", NULL, N_("Selection Caret"), "F7", NULL,
 	  G_CALLBACK (window_cmd_browse_with_caret), FALSE }
+#else
+	/* File actions. */
+	{ "ViewShortcutsHelp", NULL, N_("_Shortcuts help"), "F1", NULL,
+		  G_CALLBACK (window_cmd_view_shortcuts), FALSE },
+#endif
+
 };
 
 static const GtkActionEntry ephy_popups_entries [] = {
@@ -273,8 +287,10 @@ static const GtkActionEntry ephy_popups_entries [] = {
 
 
 	/* Inspector. */
+#if EPHY_DEFAULT_SHORTCUTS
 	{ "InspectElement", NULL, N_("Inspect _Element"), NULL,
 	  NULL, G_CALLBACK (popup_cmd_inspect_element) },
+#endif
 };
 
 static const struct
@@ -287,13 +303,18 @@ static const struct
 	/* FIXME: PageMenu should have its accel without being in the
 	 * extra keybindings, but does not seem to work for some
 	 * reason. */
+#if EPHY_DEFAULT_SHORTCUTS
 	{ GDK_KEY_F10,		0,			"PageMenu",		 TRUE },
+#endif
 	{ GDK_KEY_Home,		GDK_MOD1_MASK,	        "FileHome",		 TRUE },
 	/* FIXME: these are not in any menu for now, so add them here. */
+	{ GDK_KEY_F1,          0,                      "ViewShortcutsHelp",        FALSE },
+#if EPHY_DEFAULT_SHORTCUTS
 	{ GDK_KEY_F11,          0,                      "ViewFullscreen",        FALSE },
 	{ GDK_KEY_plus,         GDK_CONTROL_MASK,       "ViewZoomIn",            FALSE },
 	{ GDK_KEY_minus,        GDK_CONTROL_MASK,       "ViewZoomOut",           FALSE },
 	{ GDK_KEY_0,            GDK_CONTROL_MASK,       "ViewZoomNormal",        FALSE },
+#endif
 	{ GDK_KEY_g,            GDK_CONTROL_MASK,       "EditFindNext",          FALSE },
 	{ GDK_KEY_G,            GDK_CONTROL_MASK |
 	                        GDK_SHIFT_MASK,         "EditFindPrev",          FALSE },
@@ -316,10 +337,12 @@ static const struct
 	{ GDK_KEY_F5,		GDK_SHIFT_MASK,		"ViewReload",		 FALSE },
 	{ GDK_KEY_F5,		GDK_CONTROL_MASK |
 				GDK_SHIFT_MASK,		"ViewReload",		 FALSE },
+#if EPHY_DEFAULT_SHORTCUTS
 	{ GDK_KEY_KP_Add,	GDK_CONTROL_MASK,	"ViewZoomIn",		 FALSE },
 	{ GDK_KEY_KP_Subtract,	GDK_CONTROL_MASK,	"ViewZoomOut",		 FALSE },
 	{ GDK_KEY_equal,	GDK_CONTROL_MASK,	"ViewZoomIn",		 FALSE },
 	{ GDK_KEY_KP_0,		GDK_CONTROL_MASK,	"ViewZoomNormal",	 FALSE },
+#endif
 	/* These keys are a bit strange: when pressed with no modifiers, they emit
 	 * KP_PageUp/Down Control; when pressed with Control+Shift they are KP_9/3,
 	 * when NumLock is on they are KP_9/3 and with NumLock and Control+Shift

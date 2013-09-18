@@ -715,6 +715,35 @@ ephy_embed_set_fullscreen_message (EphyEmbed *embed,
   g_free (message);
 }
 
+static void
+ephy_embed_set_help_message (EphyEmbed *embed)
+{
+	char *message;
+	message = g_strdup_printf (
+			"%s\n\n"
+			"  ALT + \u2190 or Backspace  :  %s\n"
+			"  ALT + \u2192  :  %s\n"
+			"  ALT + Home    :  %s\n"
+			"  ALT + P  :  %s",
+			(_("Press F1 for help")),
+			(_("Go back")),
+			(_("Go forward")),
+			(_("Go to the homepage")),
+			(_("Print page"))
+			);
+	gtk_label_set_text (GTK_LABEL (embed->priv->fullscreen_message_label),message);
+	g_free (message);
+}
+
+void
+ephy_show_shortcuts_info (EphyEmbed *embed) {
+  ephy_embed_set_help_message(embed);
+  gtk_widget_show (embed->priv->fullscreen_message_label);
+  embed->priv->fullscreen_message_id = g_timeout_add_seconds (5,
+                                                              (GSourceFunc)fullscreen_message_label_hide,
+                                                              embed);
+}
+
 static gboolean
 entering_fullscreen_cb (WebKitWebView *web_view,
 #ifndef HAVE_WEBKIT2
