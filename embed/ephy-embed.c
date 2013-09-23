@@ -918,7 +918,7 @@ progress_update (EphyWebView *view, GParamSpec *pspec, EphyEmbed *embed)
 
     widget = GTK_WIDGET (embed->priv->web_view);
     cursor = gdk_cursor_new_from_name (gtk_widget_get_display (widget),
-                                       "left_ptr_watch");
+                                       "watch");
     if (cursor)
       gdk_window_set_cursor (gtk_widget_get_window (widget), cursor);
   }
