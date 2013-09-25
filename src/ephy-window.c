@@ -879,7 +879,9 @@ ephy_window_fullscreen (EphyWindow *window)
 	sync_tab_security (ephy_embed_get_web_view (embed), NULL, window);
 
 	sync_chromes_visibility (window);
-	ephy_embed_entering_fullscreen (embed);
+	if (!g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN, EPHY_PREFS_LOCKDOWN_FULLSCREEN)) {
+		ephy_embed_entering_fullscreen (embed);
+	}
 }
 
 static void
