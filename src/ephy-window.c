@@ -3775,8 +3775,9 @@ setup_toolbar (EphyWindow *window)
 	toolbar = ephy_toolbar_new (window);
 	gtk_widget_set_margin_left (toolbar, 4);
 	gtk_widget_set_margin_right (toolbar, 4);
-	gtk_box_pack_start (GTK_BOX (priv->main_vbox),
-			    toolbar, FALSE, FALSE, 0);
+
+        if (!g_settings_get_boolean (EPHY_SETTINGS_LOCKDOWN, EPHY_PREFS_LOCKDOWN_MENUS))
+	    gtk_box_pack_start (GTK_BOX (priv->main_vbox), toolbar, FALSE, FALSE, 0);
 
 	action = gtk_action_group_get_action (priv->toolbar_action_group,
 					      "NavigationBack");
