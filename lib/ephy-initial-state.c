@@ -470,7 +470,9 @@ void
 ephy_initial_state_save (void)
 {
   if (states) {
+#ifdef EPHY_DISABLE_SAVE_FILES
     ephy_states_save ();
+#endif
     ephy_node_unref (states);
     g_object_unref (states_db);
     states = NULL;

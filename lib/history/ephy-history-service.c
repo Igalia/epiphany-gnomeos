@@ -348,6 +348,10 @@ ephy_history_service_enable_foreign_keys (EphyHistoryService *self)
 static gboolean
 ephy_history_service_open_database_connections (EphyHistoryService *self)
 {
+#ifdef EPHY_DISABLE_SAVE_HISTORY_FILES
+  return FALSE;
+#endif
+
   EphyHistoryServicePrivate *priv = EPHY_HISTORY_SERVICE (self)->priv;
   GError *error = NULL;
 

@@ -916,6 +916,9 @@ void
 ephy_session_save (EphySession *session,
 		   const char *filename)
 {
+#ifdef EPHY_DISABLE_SAVE_FILES
+	return;
+#endif
 	EphySessionPrivate *priv;
 	EphyShell *shell;
 	SaveData *data;
@@ -1605,7 +1608,6 @@ ephy_session_resume (EphySession *session,
 		 * file. */
 		if (policy == EPHY_PREFS_RESTORE_SESSION_POLICY_NEVER)
 			session_delete (session, SESSION_STATE);
-
 		session_maybe_open_window (session, user_time);
 	}
 	else if (ephy_shell_get_n_windows (shell) == 0)

@@ -47,6 +47,10 @@ G_DEFINE_TYPE (EphyAdBlock, ephy_adblock, G_TYPE_OBJECT)
 static void
 ephy_adblock_init (EphyAdBlock *adblock)
 {
+#ifdef EPHY_DISABLE_SAVE_FILES
+	return;
+#endif
+
   LOG ("EphyAdblock initialising");
 
   adblock->priv = EPHY_ADBLOCK_GET_PRIVATE (adblock);

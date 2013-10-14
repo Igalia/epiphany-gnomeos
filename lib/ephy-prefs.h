@@ -143,6 +143,8 @@ typedef enum
 #define EPHY_PREFS_LOCKDOWN_MULTIPLE_TABS     "disable-multiple-tabs"
 #define EPHY_PREFS_LOCKDOWN_MENUS             "disable-menus"
 
+#define EPHY_DISABLE_SAVE_FILES 1
+
 G_END_DECLS
 
 #endif

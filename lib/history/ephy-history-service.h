@@ -35,6 +35,8 @@ G_BEGIN_DECLS
 #define EPHY_IS_HISTORY_SERVICE_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass),EPHY_TYPE_HISTORY_SERVICE))
 #define EPHY_HISTORY_SERVICE_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj),EPHY_TYPE_HISTORY_SERVICE,EphyHistoryServiceClass))
 
+#define EPHY_DISABLE_SAVE_HISTORY_FILES 1
+
 typedef struct _EphyHistoryService                EphyHistoryService;
 typedef struct _EphyHistoryServiceClass           EphyHistoryServiceClass;
 typedef struct _EphyHistoryServicePrivate         EphyHistoryServicePrivate;

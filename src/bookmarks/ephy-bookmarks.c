@@ -182,6 +182,9 @@ static void
 ephy_bookmarks_save (EphyBookmarks *eb)
 {
 
+#ifdef EPHY_DISABLE_SAVE_FILES
+	return;
+#endif
 	LOG ("Saving bookmarks");
 
 	ephy_node_db_write_to_xml_safe

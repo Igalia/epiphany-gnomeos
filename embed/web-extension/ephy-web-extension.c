@@ -561,9 +561,13 @@ webkit_web_extension_initialize (WebKitWebExtension *extension)
   char *service_name;
 
   ephy_debug_init ();
+
+#ifndef EPHY_DISABLE_SAVE_FILES
   uri_tester = uri_tester_new (g_getenv ("EPHY_DOT_DIR"));
+
   if (!g_getenv ("EPHY_PRIVATE_PROFILE"))
     form_auth_data_cache = ephy_form_auth_data_cache_new ();
+#endif
 
   g_signal_connect (extension, "page-created",
                     G_CALLBACK (web_page_created_callback),

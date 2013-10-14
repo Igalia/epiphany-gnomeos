@@ -91,6 +91,11 @@ ephy_profile_utils_set_migration_version (int version)
 gboolean
 ephy_profile_utils_do_migration (const char *profile_directory, int test_to_run, gboolean debug)
 {
+
+#ifdef EPHY_DISABLE_SAVE_PROFILE_FILES
+  return TRUE;
+#endif
+
   gboolean ret;
   GError *error = NULL;
   char *index = NULL, *version = NULL;

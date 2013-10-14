@@ -23,6 +23,7 @@
 #include <glib.h>
 
 #define EPHY_PROFILE_MIGRATION_VERSION 9
+#define EPHY_DISABLE_SAVE_PROFILE_FILES 1
 
 #define EPHY_HISTORY_FILE       "ephy-history.db"
 #define EPHY_BOOKMARKS_FILE     "ephy-bookmarks.xml"

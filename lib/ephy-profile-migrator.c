@@ -553,6 +553,7 @@ static GMarkupParser history_parse_funcs =
 static void
 migrate_history (void)
 {
+
   GFileInputStream *input;
   GMarkupParseContext *context;
   GError *error = NULL;
@@ -963,7 +964,9 @@ const EphyProfileMigrator migrators[] = {
   /* Very similar to migrate_passwords, but this migrates
    * login/passwords for page forms, which we previously ignored */
   migrate_passwords2,
+#ifdef EPHY_DISABLE_SAVE_FILES
   migrate_history,
+#endif
   migrate_tabs_visibility,
   migrate_web_app_links,
   migrate_new_urls_table,
