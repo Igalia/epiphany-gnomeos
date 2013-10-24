@@ -1,0 +1,43 @@
+<html>
+<head>
+
+<script type="text/javascript">
+function buildFunc() {
+    var keyMaps = Keyboard.getKeymaps();
+    var switch_kb = document.getElementById("switch_kb");
+    switch_kb.options.length = 0;
+    for (var i = 0; i < keyMaps.length; i++) {
+        switch_kb.options[switch_kb.options.length] = new Option(keyMaps[i], keyMaps[i], false, false);
+    }
+}
+
+function changeFunc() {
+    var selectBox = document.getElementById("switch_kb");
+    var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+    document.getElementById("ckb").innerHTML = "Setting keymap: " + selectedValue;
+    Keyboard.setKeymap(selectedValue);
+}
+
+</script>
+</head>
+
+<body onload="buildFunc()">
+
+<h1>Keyboard switching test</h1>
+
+<p>
+<select id="switch_kb" onchange="changeFunc()"/>
+<option value="-">-</>
+</select>
+</p>
+
+<p id="ckb">Setting keymap: -</p>
+
+<p>
+<textarea rows="4" cols="50">
+Test your keymap here!
+</textarea>
+</p>
+
+</body>
+</html>

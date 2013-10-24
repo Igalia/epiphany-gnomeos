@@ -33,6 +33,7 @@
 #include <libsoup/soup.h>
 #include <webkit2/webkit-web-extension.h>
 
+#include <JavaScriptCore/JavaScript.h>
 
 /* FIXME: These global variables should be freed somehow. */
 static UriTester *uri_tester;
@@ -555,6 +556,92 @@ bus_acquired_cb (GDBusConnection *connection,
   }
 }
 
+static JSValueRef get_key_maps_cb (JSContextRef context,
+                                   JSObjectRef function,
+                                   JSObjectRef thisObject,
+                                   size_t argumentCount,
+                                   const JSValueRef arguments[],
+                                   JSValueRef *exception)
+{
+
+  char line[1024];
+  FILE *output = popen("keyboard-getkeymaps.sh", "r");
+  fgets(line, 1023, output);
+
+  JSStringRef scriptJS = JSStringCreateWithUTF8CString(line);
+  JSObjectRef fn = JSObjectMakeFunction(context, NULL, 0, NULL, scriptJS, NULL, 1, NULL);
+  JSValueRef result = JSObjectCallAsFunction(context, fn, NULL, 0, NULL, NULL);
+  JSStringRelease(scriptJS);
+
+  return result;
+}
+
+static JSValueRef set_key_map_cb (JSContextRef context,
+                                  JSObjectRef function,
+                                  JSObjectRef thisObject,
+                                  size_t argumentCount,
+                                  const JSValueRef arguments[],
+                                  JSValueRef *exception)
+{
+  char resultString[1024];
+  char command[1024];
+  int i;
+
+  JSStringRef resultStringJS = JSValueToStringCopy(context, arguments[0], NULL);
+  // TODO: check returned sizes and overflows
+  JSStringGetUTF8CString(resultStringJS, resultString, 1024);
+  sprintf(command, "keyboard-setkeymap.sh %s", resultString);
+  system(command);
+  return NULL;
+}
+
+static const JSStaticFunction keyboard_staticfuncs[] =
+{
+    { "getKeymaps", get_key_maps_cb, kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete },
+    { "setKeymap", set_key_map_cb, kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete },
+    { NULL, NULL, 0 }
+};
+
+static const JSClassDefinition notification_def =
+{
+    0,                     // version
+    kJSClassAttributeNone, // attributes
+    "Keyboard",            // className
+    NULL,                  // parentClass
+    NULL,                  // staticValues
+    keyboard_staticfuncs,  // staticFunctions
+    NULL,                  // initialize
+    NULL,                  // finalize
+    NULL,                  // hasProperty
+    NULL,                  // getProperty
+    NULL,                  // setProperty
+    NULL,                  // deleteProperty
+    NULL,                  // getPropertyNames
+    NULL,                  // callAsFunction
+    NULL,                  // callAsConstructor
+    NULL,                  // hasInstance
+    NULL                   // convertToType
+};
+
+static void
+window_object_cleared_cb (WebKitScriptWorld *world,
+                          WebKitWebPage     *web_page,
+                          WebKitFrame       *frame,
+                          gpointer           user_data)
+{
+  JSGlobalContextRef context;
+  JSObjectRef        globalObj;
+
+  context   = webkit_frame_get_javascript_context_for_script_world (frame, world);
+  globalObj = JSContextGetGlobalObject (context);
+
+  /* Add classes to JavaScriptCore */
+  JSClassRef  classDef = JSClassCreate (&notification_def);
+  JSObjectRef classObj = JSObjectMake (context, classDef, context);
+  JSStringRef str = JSStringCreateWithUTF8CString("Keyboard");
+  JSObjectSetProperty(context, globalObj, str, classObj, kJSPropertyAttributeNone, NULL);
+}
+
 G_MODULE_EXPORT void
 webkit_web_extension_initialize (WebKitWebExtension *extension)
 {
@@ -582,4 +669,9 @@ webkit_web_extension_initialize (WebKitWebExtension *extension)
                   g_object_ref (extension),
                   (GDestroyNotify)g_object_unref);
   g_free (service_name);
+
+  g_signal_connect (webkit_script_world_get_default (),
+                    "window-object-cleared",
+                    G_CALLBACK (window_object_cleared_cb),
+                    NULL);
 }
