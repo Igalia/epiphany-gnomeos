@@ -108,5 +108,7 @@
 
 	<accelerator name="AlwaysStopAccel" action="ViewAlwaysStop"/>
 	<accelerator name="BrowseWithCaretAccel" action="BrowseWithCaret"/>
+	<accelerator name="EditUndoAccelerator" action="EditUndo"/>
+	<accelerator name="EditRedoAccelerator" action="EditRedo"/>
 
 </ui>
